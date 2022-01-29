@@ -16,4 +16,7 @@ target_sources(bayesmix
     neal8_algorithm.cc
     semihdp_sampler.h
     semihdp_sampler.cc
+    TelescopingAlgorithm.h
+    TelescopingAlgorithm.cpp
+    
 )
