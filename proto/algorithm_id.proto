@@ -10,4 +10,5 @@ enum AlgorithmId {
     BlockedGibbs = 4;
     SplitMerge = 5;
     Slice = 6;
+    Telescoping = 7;
 }
