@@ -14,7 +14,7 @@ void TelescopingAlgorithm::print_startup_message() const {
     std::cout << msg << std::endl;
 }
 
-void remove_empty(const unsigned int idx) {
+void TelescopingAlgorithm::remove_empty(const unsigned int idx) {
     //Relabel allocations
     for(auto &c : allocations){
         if(c>idx){
@@ -56,7 +56,7 @@ virtual void TelescopingAlgorithm::sample_allocations() override{
 }
 
 //Compute k_plus using get_card method of hierarchies (unique values); we then use function remove_empty inj order to remove empty clusters and perform relabeling
-unsigned int TelescopingAlgorithm::compute_KK (std::vector<std::shared_ptr<AbstractHierarchy>> unique_values) {
+unsigned int TelescopingAlgorithm::compute_KK(std::vector<std::shared_ptr<AbstractHierarchy>> unique_values) {
     for(int j=0; j < unique_values.size(); j++){
         int count = 0;
         if(unique_values[j]->get_card() > 0){
@@ -69,10 +69,25 @@ unsigned int TelescopingAlgorithm::compute_KK (std::vector<std::shared_ptr<Abstr
     }
 }
 
-virtual void sample_unique_values() {
+virtual void TelescopingAlgorithm::sample_unique_values() {
     for (auto &un : unique_values) {
         un->sample_full_cond(!update_hierarchy_params());
     }
 }
+
+void TelescopingAlgorithm::add_new_clust() {
+
+    int kk = mixing->get_K_plus();
+    int K = mixing->get_K();
+
+    for(int j = kk, j < K; j++){
+        std::shared_ptr<AbstractHierarchy> new_unique =
+                unique_values[0]->clone();
+        //Inizializzo dopo aver creato una gerarchia nuova dello stesso tipo
+        new_unique->initialize();
+        unique_values.pushback(new_unique);
+    }
+}
+
 
 

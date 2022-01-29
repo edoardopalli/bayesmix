@@ -48,9 +48,11 @@ public:
     //! Performs Gibbs sampling sub-step for all unique values
     virtual void sample_unique_values() override;
 
-    unsigned int compute_KK (std::vector<std::shared_ptr<AbstractHierarchy>>);
+    unsigned int compute_KK(std::vector<std::shared_ptr<AbstractHierarchy>>);
 
     void remove_empty(const unsigned int);
+
+    void add_new_clust();
 
 };
 
