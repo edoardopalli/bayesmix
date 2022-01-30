@@ -1,10 +1,10 @@
 #include "MFMMixing.h"
 
 
-void MFMMixing::update_K() {
+void MFMMixing::update_K(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values) {
 
-  kk = mfm::state.K_plus;
-  alpha = mfm::state.alpha;
+  int kk = mfm::state.K_plus;
+  double alpha = mfm::state.alpha;
   //prova con prior uniforme su K
   std::vector<double> log_prior(100 - kk + 1, 1/(100 - kk +1))
   std::vector<double> logprobas(100 - kk + 1);
@@ -42,13 +42,19 @@ void MFMMixing::update_alpha() {
   //step di metropolis hastings
 }
 
-void MFMMixing::update_eta() {
-  //calcolo (e1,..,ek):=params
+void MFMMixing::update_eta(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values){
+  int K = mfm::state::K;
+  int alpha = mfm::state::alpha;
+  std::vector<double> param(K);
+  for(j = 0; j < K; j++){
+      param[j] = unique_values[j]->get_card() + alpha/K;
+  }
   state.eta = stan::math::dirichlet_rng(param;rng);
 }
 
-void MFMMixing::update_state() {
-  update_K();
-  update_eta();
+void MFMMixing::update_state(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values,
+                             const std::vector<unsigned int> &allocations) {
+  update_K(unique_values);
+  update_eta(unique_values);
   update_alpha();
 }
