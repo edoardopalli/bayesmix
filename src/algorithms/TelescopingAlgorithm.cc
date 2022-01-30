@@ -3,6 +3,8 @@
 //
 
 #include "TelescopingAlgorithm.h"
+#include "src/utils/distributions.h"
+#include "src/utils/rng.h"
 
 
 //We don't find HierarchyID_Name
@@ -22,10 +24,10 @@ void TelescopingAlgorithm::remove_empty(const unsigned int idx) {
         }
     }
     //remove cluster
-    unique_values.erase(unique_values.begin() + idx)
+    unique_values.erase(unique_values.begin() + idx);
 }
 
-virtual void TelescopingAlgorithm::sample_allocations() override{
+void TelescopingAlgorithm::sample_allocations() {
     //step 1a of algorithm
 
     for(int i = 0; i < data.rows(); i++){
@@ -33,12 +35,12 @@ virtual void TelescopingAlgorithm::sample_allocations() override{
                 mixing -> get_mixing_weights(true, true);
         for(int j = 0; j < log_probas.size(); j++){
             log_probas(j) +=
-                    unique_values[j] -> get_like_lpdf(data.row(i))
+                    unique_values[j] -> get_like_lpdf(data.row(i));
         }
-
+        auto &rng = bayesmix::Rng::Instance().get();
         // Draw a NEW value for datum allocation
         unsigned int c_new =
-            bayesmix::categorical_rng(stan::math::softmax(logprobas), rng, 0);
+            bayesmix::categorical_rng(stan::math::softmax(log_probas), rng, 0);
         unsigned int c_old = allocations[i];
         if (c_new != c_old) {
         allocations[i] = c_new;
@@ -51,7 +53,7 @@ virtual void TelescopingAlgorithm::sample_allocations() override{
         }
     }
 // We have to save K+, the number of non-empty (filled) components
-    KK = compute_KK(unique_values);
+    auto KK = compute_KK(unique_values);
     mixing->set_K_plus(KK);
 }
 
@@ -69,7 +71,7 @@ unsigned int TelescopingAlgorithm::compute_KK(std::vector<std::shared_ptr<Abstra
     }
 }
 
-virtual void TelescopingAlgorithm::sample_unique_values() {
+void TelescopingAlgorithm::sample_unique_values() {
     for (auto &un : unique_values) {
         un->sample_full_cond(!update_hierarchy_params());
     }
@@ -80,14 +82,18 @@ void TelescopingAlgorithm::add_new_clust() {
     int kk = mixing->get_K_plus();
     int K = mixing->get_K();
 
-    for(int j = kk, j < K; j++){
+    for(int j = kk; j < K; j++){
         std::shared_ptr<AbstractHierarchy> new_unique =
                 unique_values[0]->clone();
         //Inizializzo dopo aver creato una gerarchia nuova dello stesso tipo
         new_unique->initialize();
-        unique_values.pushback(new_unique);
+        unique_values.push_back(new_unique);
     }
 }
 
-
-
+void TelescopingAlgorithm::step() {
+    sample_allocations();
+    sample_unique_values();
+    add_new_clust();
+    mixing->update_state(unique_values, allocations);
+}

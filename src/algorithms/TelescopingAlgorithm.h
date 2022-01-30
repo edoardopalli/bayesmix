@@ -11,13 +11,15 @@
 #include <memory>
 #include <vector>
 
+#include "base_algorithm.h"
 
 #include "algorithm_id.pb.h"
 #include "algorithm_params.pb.h"
 #include "algorithm_state.pb.h"
 #include "src/collectors/base_collector.h"
 #include "src/hierarchies/base_hierarchy.h"
-#include "src/mixings/abstract_mixing.h"
+#include "src/mixings/MFMMixing.h"
+
 
 /* This child class, inheriting from BaseAlgorithm has the goal to implement a new MCMC Algorithm,
  * Telescoping Algorithm, in order to make posterior inference on the parameters in a Mixture o Finite
@@ -31,7 +33,7 @@ public:
     ~TelescopingAlgorithm() = default;
 
     // Implementing the same as in conditional algorithm
-    bool is_conditional() const override { return true; }
+    virtual bool is_conditional() const override { return true; }
 
     virtual bool requires_conjugate_hierarchy() const { return false; }
 
@@ -53,6 +55,8 @@ public:
     void remove_empty(const unsigned int);
 
     void add_new_clust();
+
+    void step() override;
 
 };
 
