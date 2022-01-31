@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package bayesmix;
 
+/*
+ * Enum for the different types of Mixing.
+ */
 enum MixingId {
     UNKNOWN_MIXING = 0;
     DP = 1;
