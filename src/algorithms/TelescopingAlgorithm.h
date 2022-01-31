@@ -5,6 +5,7 @@
 #ifndef UNTITLED1_TELESCOPINGALGORITHM_H
 #define UNTITLED1_TELESCOPINGALGORITHM_H
 
+#include <google/protobuf/message.h>
 #include <lib/progressbar/progressbar.h>
 
 #include <Eigen/Dense>
@@ -57,6 +58,10 @@ public:
     void add_new_clust();
 
     void step() override;
+
+    //temporary modification to see if we can compile it all: defining a new object mixing directly here of class MFM
+public:
+    std::shared_ptr<MFMMixing> mixing;
 
 };
 
