@@ -59,8 +59,8 @@ void TelescopingAlgorithm::sample_allocations() {
 
 //Compute k_plus using get_card method of hierarchies (unique values); we then use function remove_empty inj order to remove empty clusters and perform relabeling
 unsigned int TelescopingAlgorithm::compute_KK(std::vector<std::shared_ptr<AbstractHierarchy>> unique_values) {
+    int count = 0;
     for(int j=0; j < unique_values.size(); j++){
-        int count = 0;
         if(unique_values[j]->get_card() > 0){
             count += 1;
         }
@@ -69,6 +69,7 @@ unsigned int TelescopingAlgorithm::compute_KK(std::vector<std::shared_ptr<Abstra
             j -= 1;
         }
     }
+    return count;
 }
 
 void TelescopingAlgorithm::sample_unique_values() {
