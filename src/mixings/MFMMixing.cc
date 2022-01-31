@@ -1,13 +1,22 @@
 #include "MFMMixing.h"
+#include "src/utils/distributions.h"
+#include "src/utils/rng.h"
 
+
+int MFMMixing::factorial(int n) const {
+    if ((n == 0) || (n == 1))
+        return 1;
+    else
+        return n * factorial(n - 1);
+}
 
 void MFMMixing::update_K(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values) {
 
-  int kk = mfm::state.K_plus;
-  double alpha = mfm::state.alpha;
+  int kk = get_K_plus();
+  double alpha = get_alpha();
   //prova con prior uniforme su K
-  std::vector<double> log_prior(100 - kk + 1, 1/(100 - kk +1))
-  std::vector<double> logprobas(100 - kk + 1);
+  Eigen::VectorXd log_prior(100 - kk + 1, 1/(100 - kk +1));
+  Eigen::VectorXd logprobas(100 - kk + 1);
   //Devo passare la prior di K
   //K-1 -> BNB(1; 4; 3)
   //Vedi in hierarchy_prior.proto
@@ -29,7 +38,8 @@ void MFMMixing::update_K(const std::vector<std::shared_ptr<AbstractHierarchy>> &
   }
   logprobas += log_prior;
   //Come input K e K+
-  state.K=categorical_rng(logprobas, rng, 0);
+  auto &rng = bayesmix::Rng::Instance().get();
+    state.K = bayesmix::categorical_rng(stan::math::softmax(logprobas), rng, 0);
 
   //DA FARE: eval prior BNB p(K)
   //         come prendere Nk
@@ -43,13 +53,14 @@ void MFMMixing::update_alpha() {
 }
 
 void MFMMixing::update_eta(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values){
-  int K = mfm::state::K;
-  int alpha = mfm::state::alpha;
-  std::vector<double> param(K);
-  for(j = 0; j < K; j++){
+  int K = get_K();
+  int alpha = get_alpha();
+  Eigen::VectorXd param(K);
+  for(int j = 0; j < K; j++){
       param[j] = unique_values[j]->get_card() + alpha/K;
   }
-  state.eta = stan::math::dirichlet_rng(param;rng);
+  auto &rng = bayesmix::Rng::Instance().get();
+  state.etas = stan::math::dirichlet_rng(param,rng);
 }
 
 void MFMMixing::update_state(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values,

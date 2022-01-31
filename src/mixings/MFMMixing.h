@@ -13,10 +13,11 @@
 #include <Eigen/Dense>
 #include <memory>
 #include <vector>
+
 #include <math.h>
 #include "abstract_mixing.h"
 #include "base_mixing.h"
-#include "dirichlet_mixing.h"
+
 
 #include "src/hierarchies/abstract_hierarchy.h"
 
@@ -28,25 +29,29 @@ struct state {
 
 // Mancano i parametri di input delle funzioni
 class MFMMixing
-    : public BaseMixing<MFMMixing, mfm::state, bayesmix::DPPrior> {
+    : public BaseMixing<MFMMixing, mfm::state, bayesmix::NNWPrior> {
 
   MFMMixing() = default;
   ~MFMMixing()= default;
 
-  int get_K() {return state.K;}
-  int get_K_plus() {return state.K_plus;}
+public:
+    int get_K() {return state.K;}
+    int get_K_plus() {return state.K_plus;}
+    double get_alpha() {return state.alpha;}
 
-  void set_K_plus(int kk) {state.K_plus = kk; }
-  void set_K(int k_) {state.K = k_; }
+    void set_K_plus(int kk) {state.K_plus = kk; }
+    void set_K(int k_) {state.K = k_; }
 
-  void update_state(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values,
+    void update_state(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values,
                     const std::vector<unsigned int> &allocations) override;
 
-  void update_K(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values);
+    void update_K(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values);
 
-  void update_eta(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values);
+    void update_eta(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values);
 
-  void update_alpha();
+    void update_alpha();
+
+    int factorial(int n) const;
 
 };
 
