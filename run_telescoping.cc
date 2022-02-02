@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
       .help("enum string of the mixing, see the file proto/mixing_id.proto");
 
   args.add_argument("--mix-args")
-      .required()
+      .default_value(std::string("\"\""))
       .help(
           "asciipb file with the parameters of the mixing, see "
           "the file proto/mixing_prior.proto");
@@ -108,34 +108,7 @@ int main(int argc, char *argv[]) {
           "(Optional) Where to store the best cluster allocation found by "
           "minimizing the Binder loss function over the visited partitions");
 
-  args.add_argument("--hier-cov-file")
-      .default_value(std::string("\"\""))
-      .help(
-          "(Optional) Only for dependent models. Path to a csv file with the "
-          "covariates used in the hierarchy");
 
-  args.add_argument("--hier-grid-cov-file")
-      .default_value(std::string("\"\""))
-      .help(
-          "(Optional) Only for dependent models and when 'grid-file' is not "
-          "empty. "
-          "Path to a csv file with the values covariates used in the "
-          "hierarchy "
-          "on which to evaluate the (log) predictive density");
-
-  args.add_argument("--mix-cov-file")
-      .default_value(std::string("\"\""))
-      .help(
-          "(Optional) Only for dependent models. Path to a csv file with the "
-          "covariates used in the mixing");
-
-  args.add_argument("--mix-grid-cov-file")
-      .default_value(std::string("\"\""))
-      .help(
-          "(Optional) Only for dependent models and when 'grid-file' is not "
-          "empty. "
-          "Path to a csv file with the values covariates used in the mixing "
-          "on which to evaluate the (log) predictive density");
 
   try {
     args.parse_args(argc, argv);
@@ -172,8 +145,8 @@ int main(int argc, char *argv[]) {
     coll = new FileCollector(args.get<std::string>("--coll-name"));
   }
 //QUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-  bayesmix::read_proto_from_file(args.get<std::string>("--mix-args"),
-                                 mixing->get_mutable_prior());
+ // bayesmix::read_proto_from_file(args.get<std::string>("--mix-args"),
+ //                                mixing->get_mutable_prior());
   bayesmix::read_proto_from_file(args.get<std::string>("--hier-args"),
                                  hier->get_mutable_prior());
 
@@ -189,18 +162,6 @@ int main(int argc, char *argv[]) {
   algo->set_data(data);
   algo->set_hierarchy(hier);
 
-  // Read and set covariates
-  if (hier->is_dependent()) {
-    Eigen::MatrixXd hier_cov =
-        bayesmix::read_eigen_matrix(args.get<std::string>("--hier-cov-file"));
-    algo->set_hier_covariates(hier_cov);
-  }
-
-  if (mixing->is_dependent()) {
-    Eigen::MatrixXd mix_cov =
-        bayesmix::read_eigen_matrix(args.get<std::string>("--mix-cov-file"));
-    algo->set_mix_covariates(mix_cov);
-  }
 
   // Run algorithm
   algo->run(coll);
