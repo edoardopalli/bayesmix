@@ -151,10 +151,10 @@ add_library(bayesmixlib $<TARGET_OBJECTS:bayesmix>)
 
 if (BUILD_RUN)
   # Build run executable
-  add_executable(run_mcmc $<TARGET_OBJECTS:bayesmix> run_mcmc.cc)
-  target_include_directories(run_mcmc PUBLIC ${INCLUDE_PATHS})
-  target_link_libraries(run_mcmc PUBLIC ${LINK_LIBRARIES})
-  target_compile_options(run_mcmc PUBLIC ${COMPILE_OPTIONS})
+  add_executable(run_telescop $<TARGET_OBJECTS:bayesmix> run_telescoping.cc)
+  target_include_directories(run_telescop PUBLIC ${INCLUDE_PATHS})
+  target_link_libraries(run_telescop PUBLIC ${LINK_LIBRARIES})
+  target_compile_options(run_telescop PUBLIC ${COMPILE_OPTIONS})
 endif()
 
 if (NOT DISABLE_TESTS)
