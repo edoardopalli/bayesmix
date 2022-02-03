@@ -2,6 +2,18 @@
 #include "src/utils/distributions.h"
 #include "src/utils/rng.h"
 
+#include <google/protobuf/stubs/casts.h>
+
+#include <memory>
+#include <stan/math/prim/prob.hpp>
+#include <vector>
+
+#include "mixing_prior.pb.h"
+#include "mixing_state.pb.h"
+#include "src/hierarchies/abstract_hierarchy.h"
+#include "src/utils/rng.h"
+#include <iostream>
+#include <random>
 
 int MFMMixing::factorial(int n) const {
     if ((n == 0) || (n == 1))
@@ -79,3 +91,48 @@ Eigen::VectorXd MFMMixing::get_log_etas() {
 
   return log_etas;
 }
+
+//Genero rng
+auto &rng = bayesmix::Rng::Instance().get();
+//Per sampling da una NB
+std::default_random_engine generator;
+
+void MFMMixing::initialize_state() {
+    auto priorcast = cast_prior();
+    if (priorcast->has_fixed_value()) {
+      std::default_random_engine generator;
+      std::uniform_int_distribution<int> uniform(1, 100);
+
+      //mettiamo kmax uguale a 100, da controllare
+      set_K(uniform(generator));
+      set_log_alpha(0);
+    }
+    else if (priorcast->has_bnb_prior()){
+        double rate = priorcast->bnb_prior().k_prior().rate();
+        double shape_a = priorcast->bnb_prior().k_prior().shape_a();
+        double shape_b = priorcast->bnb_prior().k_prior().shape_b();
+        if (rate <= 0) {
+            throw std::invalid_argument("Rate parameter must be > 0");
+        }
+        if (shape_a <= 0) {
+            throw std::invalid_argument("Shape a parameter must be > 0");
+        }
+        if (shape_b <= 0) {
+            throw std::invalid_argument("Shape b parameter must be > 0");
+        }
+
+        //p ~ beta(a,b), p=y1/(y1+y2), y1 ~ gamma(a,d), y2 ~ gamma(b,d)
+        //per ogni d, d=1
+        //p ~ beta(a,b), X ~ negBin(r,p) -> X ~ BNB(r,a,b)
+        //double p = stan::math::beta_rng(rng, shape_a, shape_b);
+        std::gamma_distribution<double> gamma1(shape_a,1);
+        double y1 = gamma1(generator);
+        std::gamma_distribution<double> gamma2(shape_b,1);
+        double y2 = gamma2(generator);
+        double p = y1/(y1+y2);
+        std::negative_binomial_distribution<int> BNB(rate,p);
+        set_K(BNB(generator));
+        set_log_alpha(0);
+    }
+
+    }
