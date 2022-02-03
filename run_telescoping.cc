@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
       .help("enum string of the mixing, see the file proto/mixing_id.proto");
 
   args.add_argument("--mix-args")
-      .default_value(std::string("\"\""))
+      .required()
       .help(
           "asciipb file with the parameters of the mixing, see "
           "the file proto/mixing_prior.proto");
@@ -145,8 +145,8 @@ int main(int argc, char *argv[]) {
     coll = new FileCollector(args.get<std::string>("--coll-name"));
   }
 //QUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
- // bayesmix::read_proto_from_file(args.get<std::string>("--mix-args"),
- //                                mixing->get_mutable_prior());
+  bayesmix::read_proto_from_file(args.get<std::string>("--mix-args"),
+                                 mixing->get_mutable_prior());
   bayesmix::read_proto_from_file(args.get<std::string>("--hier-args"),
                                  hier->get_mutable_prior());
 
