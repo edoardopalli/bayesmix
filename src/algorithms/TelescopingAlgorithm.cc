@@ -32,7 +32,7 @@ void TelescopingAlgorithm::sample_allocations() {
 
     for(int i = 0; i < data.rows(); i++){
         Eigen::VectorXd log_probas =
-                mixing -> get_mixing_weights(true, true);
+                mixing -> get_log_etas();
         for(int j = 0; j < log_probas.size(); j++){
             log_probas(j) +=
                     unique_values[j] -> get_like_lpdf(data.row(i));
