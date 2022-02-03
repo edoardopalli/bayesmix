@@ -67,3 +67,19 @@ message TruncSBPrior {
   }
   uint32 num_components = 4; // Number of components in the process
 }
+
+
+message MFMPrior {
+    message BNBDistribution{
+        BeNeBiDistribution K_prior = 1;
+    }
+
+    oneof K {
+        MFMState fixed_value = 1; // no prior -> uniforme
+        BNBDistribution bnb_prior = 2; //Prior on K
+    }
+}
+
+
+
+

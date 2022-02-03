@@ -34,6 +34,11 @@ message TruncSBState {
   Vector logweights = 2;
 }
 
+message MFMState {
+    int32 K = 1;
+    double alpha = 2;
+}
+
 /*
  * Wrapper of all possible mixing states into a single oneof
  */
@@ -43,5 +48,8 @@ message MixingState {
     PYState py_state = 2;
     LogSBState log_sb_state = 3;
     TruncSBState trunc_sb_state = 4;
+    MFMState mfm_state = 5;
   }
 }
+
+
