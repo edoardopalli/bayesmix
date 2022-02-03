@@ -13,7 +13,7 @@ int MFMMixing::factorial(int n) const {
 void MFMMixing::update_K(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values) {
 
   int kk = get_K_plus();
-  double alpha = get_alpha();
+  double alpha = exp(get_log_alpha());
   //prova con prior uniforme su K
   Eigen::VectorXd log_prior(100 - kk + 1, 1/(100 - kk +1));
   Eigen::VectorXd logprobas(100 - kk + 1);
@@ -39,14 +39,14 @@ void MFMMixing::update_K(const std::vector<std::shared_ptr<AbstractHierarchy>> &
   logprobas += log_prior;
   //Come input K e K+
   auto &rng = bayesmix::Rng::Instance().get();
-    state.K = bayesmix::categorical_rng(stan::math::softmax(logprobas), rng, 0);
+  state.K = bayesmix::categorical_rng(stan::math::softmax(logprobas), rng, 0);
 
   //DA FARE: eval prior BNB p(K)
   //         come prendere Nk
 
 }
 
-void MFMMixing::update_alpha() {
+void MFMMixing::update_log_alpha() {
   //Come input K e K+
   //step 3b
   //step di metropolis hastings
@@ -54,18 +54,28 @@ void MFMMixing::update_alpha() {
 
 void MFMMixing::update_eta(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values){
   int K = get_K();
-  int alpha = get_alpha();
+  int alpha = exp(get_log_alpha());
   Eigen::VectorXd param(K);
   for(int j = 0; j < K; j++){
       param[j] = unique_values[j]->get_card() + alpha/K;
   }
   auto &rng = bayesmix::Rng::Instance().get();
-  state.etas = stan::math::dirichlet_rng(param,rng);
+  etas = stan::math::dirichlet_rng(param,rng);
 }
 
 void MFMMixing::update_state(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values,
                              const std::vector<unsigned int> &allocations) {
   update_K(unique_values);
   update_eta(unique_values);
-  update_alpha();
+  update_log_alpha();
+}
+
+Eigen::VectorXd MFMMixing::get_log_etas() {
+  int K = get_K();
+  Eigen::VectorXd log_etas(K);
+  for(int i=0; i<log_etas.size(); i++){
+    log_etas[i] = log(etas[i]);
+  }
+
+  return log_etas;
 }
