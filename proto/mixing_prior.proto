@@ -71,7 +71,7 @@ message TruncSBPrior {
 
 message MFMPrior {
     message BNBDistribution{
-        BeNeBiDistribution K_prior = 1;
+        BeNeBiDistribution k_prior = 1;
     }
 
     oneof K {
