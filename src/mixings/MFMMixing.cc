@@ -26,35 +26,44 @@ void MFMMixing::update_K(const std::vector<std::shared_ptr<AbstractHierarchy>> &
 
   int kk = get_K_plus();
   double alpha = exp(get_log_alpha());
-  //prova con prior uniforme su K
-  Eigen::VectorXd log_prior(100 - kk + 1, 1/(100 - kk +1));
   Eigen::VectorXd logprobas(100 - kk + 1);
-  //Devo passare la prior di K
-  //K-1 -> BNB(1; 4; 3)
-  //Vedi in hierarchy_prior.proto
-  //message BNBPrior
-    //alpha = 1;
-    //a_pi = 4;
-    //b_pi = 3;
+  Eigen::VectorXd log_prior(100 - kk + 1, 1/(100 - kk + 1));
+  //prova con prior uniforme su K
+
+  auto priorcast = cast_prior();
+
+  double rate = priorcast->bnb_prior().k_prior().rate();
+  double shape_a = priorcast->bnb_prior().k_prior().shape_a();
+  double shape_b = priorcast->bnb_prior().k_prior().shape_b();
 
   for(int j = 0; logprobas.size(); j++){
-      logprobas[j] = (kk)*log(alpha) + log(factorial(j + kk));
-      logprobas[j] -= (kk*log(j+kk) + log(factorial(j)));
+    logprobas[j] = (kk)*log(alpha) + log(factorial(j + kk));
+    logprobas[j] -= (kk*log(j+kk) + log(factorial(j)));
 
-      double log_new = 0.0;
-      for(int i = 0; i < kk; i++){
-          log_new += log(std::tgamma(unique_values[i]->get_card()) + alpha/(j+kk));
-          log_new -= log(std::tgamma(1 + alpha/(j + kk)));
-      }
-      logprobas[j] += log_new;
+    double log_new = 0.0;
+    for(int i = 0; i < kk; i++){
+      log_new += log(std::tgamma(unique_values[i]->get_card()) + alpha/(j+kk));
+      log_new -= log(std::tgamma(1 + alpha/(j + kk)));
+    }
+    logprobas[j] += log_new;
   }
-  logprobas += log_prior;
+
+  if (priorcast->has_fixed_value()) {
+    logprobas += log_prior;
+  }
+  else {
+    Eigen::VectorXd priors = bayesmix::evaluate_BNB(rate, shape_a, shape_b, 99);
+    for(int i = kk-1; i < 100; i++){
+      log_prior[i] = log(priors[i]);
+    }
+    logprobas += log_prior;
+  }
+
+  //Devo passare la prior di K
+
   //Come input K e K+
   auto &rng = bayesmix::Rng::Instance().get();
-  state.K = bayesmix::categorical_rng(stan::math::softmax(logprobas), rng, 0);
-
-  //DA FARE: eval prior BNB p(K)
-  //         come prendere Nk
+  state.K = bayesmix::categorical_rng(stan::math::softmax(logprobas), rng, kk);
 
 }
 
@@ -92,10 +101,44 @@ Eigen::VectorXd MFMMixing::get_log_etas() {
   return log_etas;
 }
 
-//Genero rng
-auto &rng = bayesmix::Rng::Instance().get();
-//Per sampling da una NB
-std::default_random_engine generator;
+
+
+int MFMMixing::sample_BNB() {
+  auto priorcast = cast_prior();
+
+  //Genero rng
+  auto &rng = bayesmix::Rng::Instance().get();
+  //Per sampling da una NB
+  std::default_random_engine generator;
+
+  double rate = priorcast->bnb_prior().k_prior().rate();
+  double shape_a = priorcast->bnb_prior().k_prior().shape_a();
+  double shape_b = priorcast->bnb_prior().k_prior().shape_b();
+  if (rate <= 0) {
+    throw std::invalid_argument("Rate parameter must be > 0");
+  }
+  if (shape_a <= 0) {
+    throw std::invalid_argument("Shape a parameter must be > 0");
+  }
+  if (shape_b <= 0) {
+    throw std::invalid_argument("Shape b parameter must be > 0");
+  }
+
+  //p ~ beta(a,b), p=y1/(y1+y2), y1 ~ gamma(a,d), y2 ~ gamma(b,d)
+  //per ogni d, d=1
+  //p ~ beta(a,b), X ~ negBin(r,p) -> X ~ BNB(r,a,b)
+  //double p = stan::math::beta_rng(rng, shape_a, shape_b);
+  std::gamma_distribution<double> gamma1(shape_a,1);
+  double y1 = gamma1(generator);
+  std::gamma_distribution<double> gamma2(shape_b,1);
+  double y2 = gamma2(generator);
+  double p = y1/(y1+y2);
+  //p è una Beta(rate_a, rate_b)
+
+  std::negative_binomial_distribution<int> BNB(rate,p);
+  return BNB(generator);
+
+}
 
 void MFMMixing::initialize_state() {
     auto priorcast = cast_prior();
@@ -105,34 +148,9 @@ void MFMMixing::initialize_state() {
 
       //mettiamo kmax uguale a 100, da controllare
       set_K(uniform(generator));
-      set_log_alpha(0);
     }
-    else if (priorcast->has_bnb_prior()){
-        double rate = priorcast->bnb_prior().k_prior().rate();
-        double shape_a = priorcast->bnb_prior().k_prior().shape_a();
-        double shape_b = priorcast->bnb_prior().k_prior().shape_b();
-        if (rate <= 0) {
-            throw std::invalid_argument("Rate parameter must be > 0");
-        }
-        if (shape_a <= 0) {
-            throw std::invalid_argument("Shape a parameter must be > 0");
-        }
-        if (shape_b <= 0) {
-            throw std::invalid_argument("Shape b parameter must be > 0");
-        }
-
-        //p ~ beta(a,b), p=y1/(y1+y2), y1 ~ gamma(a,d), y2 ~ gamma(b,d)
-        //per ogni d, d=1
-        //p ~ beta(a,b), X ~ negBin(r,p) -> X ~ BNB(r,a,b)
-        //double p = stan::math::beta_rng(rng, shape_a, shape_b);
-        std::gamma_distribution<double> gamma1(shape_a,1);
-        double y1 = gamma1(generator);
-        std::gamma_distribution<double> gamma2(shape_b,1);
-        double y2 = gamma2(generator);
-        double p = y1/(y1+y2);
-        std::negative_binomial_distribution<int> BNB(rate,p);
-        set_K(BNB(generator));
-        set_log_alpha(0);
+    else {
+      set_K(sample_BNB());
     }
-
-    }
+    set_log_alpha(0);
+}

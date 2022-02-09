@@ -56,6 +56,7 @@ public:
     int factorial(int n) const;
 
     void initialize_state() override;
+    int sample_BNB();
 
  protected:
     int K_plus;
