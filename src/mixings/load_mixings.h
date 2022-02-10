@@ -34,11 +34,14 @@ __attribute__((constructor)) static void load_mixings() {
   Builder<AbstractMixing> TruncSBbuilder = []() {
     return std::make_shared<TruncatedSBMixing>();
   };
-
+  Builder<AbstractMixing> MFMbuilder = []() {
+    return std::make_shared<MFMMixing>();
+  };
   factory.add_builder(DirichletMixing().get_id(), DPbuilder);
   factory.add_builder(LogitSBMixing().get_id(), LogSBbuilder);
   factory.add_builder(PitYorMixing().get_id(), PYbuilder);
   factory.add_builder(TruncatedSBMixing().get_id(), TruncSBbuilder);
+  factory.add_builder(MFMMixing().get_id(), MFMbuilder);
 }
 
 #endif  // BAYESMIX_MIXINGS_LOAD_MIXINGS_H_
