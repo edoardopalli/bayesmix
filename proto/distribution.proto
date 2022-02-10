@@ -88,4 +88,3 @@ message MultiNormalIGDistribution {
   double shape = 3;
   double scale = 4;
 }
->>>>>>> f4bdeda10c59da003109de4d563e4bfb0b82ffcb
