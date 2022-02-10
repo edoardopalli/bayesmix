@@ -10,6 +10,7 @@
 #include "neal2_algorithm.h"
 #include "neal3_algorithm.h"
 #include "neal8_algorithm.h"
+#include "TelescopingAlgorithm.h"
 #include "src/runtime/factory.h"
 
 //! Loads all available `Algorithm` objects into the appropriate factory, so
@@ -35,11 +36,15 @@ __attribute__((constructor)) static void load_algorithms() {
   Builder<BaseAlgorithm> BlockedGibbsbuilder = []() {
     return std::make_shared<BlockedGibbsAlgorithm>();
   };
+  Builder<BaseAlgorithm> Telescopingbuilder = []() {
+    return std::make_shared<TelescopingAlgorithm>();
+  };
 
   factory.add_builder(Neal2Algorithm().get_id(), Neal2builder);
   factory.add_builder(Neal3Algorithm().get_id(), Neal3builder);
   factory.add_builder(Neal8Algorithm().get_id(), Neal8builder);
   factory.add_builder(BlockedGibbsAlgorithm().get_id(), BlockedGibbsbuilder);
+  factory.add_builder(TelescopingAlgorithm().get_id(), Telescopingbuilder);
 }
 
 #endif  // BAYESMIX_ALGORITHMS_LOAD_ALGORITHMS_H_
