@@ -87,8 +87,9 @@ void MFMMixing::update_eta(const std::vector<std::shared_ptr<AbstractHierarchy>>
 void MFMMixing::update_state(const std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values,
                              const std::vector<unsigned int> &allocations) {
   update_K(unique_values);
-  update_eta(unique_values);
   update_log_alpha();
+  update_eta(unique_values);
+
 }
 
 Eigen::VectorXd MFMMixing::get_log_etas() {
