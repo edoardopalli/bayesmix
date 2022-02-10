@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "base_algorithm.h"
-
+#include "conditional_algorithm.h"
 #include "algorithm_id.pb.h"
 #include "algorithm_params.pb.h"
 #include "algorithm_state.pb.h"
@@ -28,17 +28,17 @@
  * The Algorithm and the necessary theory is presented in FRÜHWIRTH-SCHNATTER, S., MALSINER-WALLI, G. AND GRÜN, B.
  * 2020, Generalized Mixture of Finite Mixtures and Telescoping Sampling.
  */
-class TelescopingAlgorithm : public BaseAlgorithm {
+class TelescopingAlgorithm : public ConditionalAlgorithm{
 public:
     TelescopingAlgorithm() = default;
     ~TelescopingAlgorithm() = default;
 
     // Implementing the same as in conditional algorithm
-    virtual bool is_conditional() const override { return true; }
+    //virtual bool is_conditional() const override { return true; }
 
-    virtual bool requires_conjugate_hierarchy() const { return false; }
+    //virtual bool requires_conjugate_hierarchy() const { return false; }
 
-    bayesmix::AlgorithmId get_id() const override {
+    bayesmix::AlgorithmId get_id() const  {
         return bayesmix::AlgorithmId::Telescoping;
     }
 
@@ -56,6 +56,8 @@ public:
     void remove_empty(const unsigned int);
 
     void add_new_clust();
+
+    void sample_weights() override {}
 
     void step() override;
 
