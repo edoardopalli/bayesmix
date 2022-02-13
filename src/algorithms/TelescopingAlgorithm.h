@@ -38,32 +38,32 @@ public:
 
     //virtual bool requires_conjugate_hierarchy() const { return false; }
 
-    bayesmix::AlgorithmId get_id() const  {
-        return bayesmix::AlgorithmId::Telescoping;
+   public:
+    bayesmix::AlgorithmId get_id() const  override{
+      return bayesmix::AlgorithmId::Telescoping;
     }
+      //! Prints a message at the beginning of `run()`
+      void print_startup_message() const override;
 
-    //! Prints a message at the beginning of `run()`
-    virtual void print_startup_message() const override;
+      //! Performs Gibbs sampling sub-step for all allocation values
+      void sample_allocations() override;
 
-    //! Performs Gibbs sampling sub-step for all allocation values
-    virtual void sample_allocations() override;
+      //! Performs Gibbs sampling sub-step for all unique values
+      void sample_unique_values() override;
 
-    //! Performs Gibbs sampling sub-step for all unique values
-    virtual void sample_unique_values() override;
+      unsigned int compute_KK(std::vector<std::shared_ptr<AbstractHierarchy>> &);
 
-    unsigned int compute_KK(std::vector<std::shared_ptr<AbstractHierarchy>>);
+      void remove_empty(const unsigned int);
 
-    void remove_empty(const unsigned int);
+      void add_new_clust();
 
-    void add_new_clust();
+      void sample_weights() override {}
 
-    void sample_weights() override {}
-
-    void step() override;
+      void step() override;
 
     //temporary modification to see if we can compile it all: defining a new object mixing directly here of class MFM
 public:
-    std::shared_ptr<MFMMixing> mixing;
+   //std::shared_ptr<MFMMixing> mixing;
 
 };
 

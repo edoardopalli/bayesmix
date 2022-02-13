@@ -66,6 +66,7 @@ class AbstractMixing {
         return mixing_weights(log, propto);
       }
     }
+
   }
 
   //! Public wrapper for `mass_existing_cluster()` methods
@@ -122,6 +123,9 @@ class AbstractMixing {
 
   //! Returns whether the mixing depends on covariate values or not
   virtual bool is_dependent() const { return false; }
+
+  virtual void set_K_plus(const int kk) {};
+  virtual int get_K_plus() const {return 0;}
 
  protected:
   //! Returns mixing weights (for conditional mixings only)

@@ -59,6 +59,8 @@ class BaseAlgorithm {
     }
     // Main loop
     while (iter < maxiter) {
+      std::cout << "####################" << std::endl;
+      std::cout << "Iteration: " << iter + 1 << std::endl;
       step();
       if (iter >= burnin) {
         save_state(collector, iter);
@@ -126,7 +128,7 @@ class BaseAlgorithm {
   //! Reads and sets algorithm parameters from an appropriate Protobuf message
   virtual void read_params_from_proto(const bayesmix::AlgorithmParams &params);
 
- protected:
+ public:
   // ALGORITHM FUNCTIONS
   //! Initializes all members of the class before running the algorithm
   virtual void initialize();

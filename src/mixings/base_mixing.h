@@ -66,6 +66,8 @@ class BaseMixing : public AbstractMixing {
   //! Initializes state parameters to appropriate values
   virtual void initialize_state() = 0;
 
+
+
   //! Down-casts the given generic proto message to a MixingState proto
   bayesmix::MixingState *downcast_state(google::protobuf::Message *out) const {
     return google::protobuf::internal::down_cast<bayesmix::MixingState *>(out);

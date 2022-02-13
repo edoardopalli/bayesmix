@@ -121,9 +121,11 @@ void BaseAlgorithm::initialize() {
   // Initialize hierarchies
   unique_values[0]->initialize();
   unsigned int num_components = mixing->get_num_components();
+
   for (size_t i = 0; i < num_components - 1; i++) {
     unique_values.push_back(unique_values[0]->clone());
     unique_values[i]->sample_prior();
+
   }
   // Build uniform probability on clusters, given their initial number
   std::default_random_engine generator;
@@ -135,6 +137,7 @@ void BaseAlgorithm::initialize() {
     unique_values[i]->add_datum(i, data.row(i), update_hierarchy_params(),
                                 hier_covariates.row(i));
   }
+
   // Randomly allocate all remaining data, and update cardinalities
   for (size_t i = num_components; i < data.rows(); i++) {
     unsigned int clust = distro(generator);

@@ -236,6 +236,7 @@ void BaseHierarchy<Derived, State, Hyperparams, Prior>::remove_datum(
   static_cast<Derived *>(this)->update_ss(datum, covariate, false);
   set_card(card - 1);
   auto it = cluster_data_idx.find(id);
+  if(cluster_data_idx.begin()==cluster_data_idx.end()) std::cout <<"zio pera" <<std::endl;
   assert(it != cluster_data_idx.end());
   cluster_data_idx.erase(it);
   if (update_params) {
