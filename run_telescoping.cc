@@ -128,12 +128,14 @@ int main(int argc, char *argv[]) {
 
   // Create factories and objects
   auto &factory_algo = AlgorithmFactory::Instance();
+  //std::cout << "Superiamo l'istanza factory?" << std::endl;
   auto &factory_hier = HierarchyFactory::Instance();
   auto &factory_mixing = MixingFactory::Instance();
   auto algo = factory_algo.create_object(algo_proto.algo_id());
   auto hier = factory_hier.create_object(args.get<std::string>("--hier-type"));
   auto mixing =
       factory_mixing.create_object(args.get<std::string>("--mix-type"));
+
 
   BaseCollector *coll;
   if (args["--coll-name"] == std::string("memory")) {
@@ -144,27 +146,31 @@ int main(int argc, char *argv[]) {
               << args.get<std::string>("--coll-name") << std::endl;
     coll = new FileCollector(args.get<std::string>("--coll-name"));
   }
-//QUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
   bayesmix::read_proto_from_file(args.get<std::string>("--mix-args"),
                                  mixing->get_mutable_prior());
+
   bayesmix::read_proto_from_file(args.get<std::string>("--hier-args"),
                                  hier->get_mutable_prior());
+
 
   // Read data matrices
   Eigen::MatrixXd data =
       bayesmix::read_eigen_matrix(args.get<std::string>("--data-file"));
 
+
   // Set algorithm parameters
   algo->read_params_from_proto(algo_proto);
+
 
   // Allocate objects in algorithm
   algo->set_mixing(mixing);
   algo->set_data(data);
   algo->set_hierarchy(hier);
 
-
+  //std::cout << "Qui inizia il run, tutto ok" << std::endl;
   // Run algorithm
   algo->run(coll);
+
 
   if (args["--grid-file"] != std::string("\"\"") &&
       args["--dens-file"] != std::string("\"\"")) {
