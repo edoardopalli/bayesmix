@@ -1,0 +1,8 @@
+bnb_prior{
+    k_prior{
+        rate : 1;
+        shape_a : 4;
+        shape_b : 3;
+    }
+
+}
