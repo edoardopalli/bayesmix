@@ -1,13 +1,4 @@
 #!/usr/bin/env bash
 
-build/run_mcmc \
-  --algo-params-file resources/tutorial/algo.asciipb \
-  --hier-type NNIG --hier-args resources/tutorial/nnig_ngg.asciipb \
-  --mix-type DP --mix-args resources/tutorial/dp_gamma.asciipb \
-  --coll-name resources/tutorial/out/chains.recordio \
-  --data-file resources/tutorial/data.csv \
-  --grid-file resources/tutorial/grid.csv \
-  --dens-file resources/tutorial/out/density_file.csv \
-  --n-cl-file resources/tutorial/out/numclust.csv \
-  --clus-file resources/tutorial/out/clustering.csv \
-  #--best-clus-file resources/tutorial/out/best_clustering.csv
+build/run_telescop\
+ --algo-params-file resources/prova1_tele/algo.asciipb --hier-type NNW --hier-args resources/prova1_tele/nnw_nniw.asciipb --mix-type MFM --mix-args resources/prova1_tele/mfm_bnb.asciipb --coll-name resources/prova1_tele/out/chains.recordio --data-file resources/prova1_tele/faithful.csv --grid-file resources/prova1_tele/faithful_grid.csv --dens-file resources/prova1_tele/out/density_file.csv --n-cl-file resources/prova1_tele/out/numclust.csv --clus-file resources/prova1_tele/out/clustering.csv --best-clus-file resources/prova1_tele/out/best_clustering.csv
