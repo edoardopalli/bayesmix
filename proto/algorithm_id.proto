@@ -19,4 +19,5 @@ enum AlgorithmId {
     SplitMerge = 5;
     Slice = 6;
     Telescoping = 7;
+
 }
