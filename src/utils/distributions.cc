@@ -194,13 +194,3 @@ double bayesmix::gaussian_mixture_dist(
 
   return out;
 }
-
-//evaluate a BNB probability mass function on a vector of K, assuming proportional
-Eigen::VectorXd bayesmix::evaluate_BNB(int rate, double shape_a, double shape_b, int K_max) {
-  Eigen::VectorXd probas(K_max);
-  for(int i=0; i<K_max; i++){
-    probas[i] = (std::beta(rate + i, shape_a + shape_b)/std::beta(rate,shape_a)) * (tgamma(i + shape_b)/(tgamma(i+1)*tgamma(shape_b)));
-  }
-  return probas;
-
-}

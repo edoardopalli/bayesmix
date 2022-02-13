@@ -130,9 +130,6 @@ double gaussian_mixture_dist(
     std::vector<bayesmix::AlgorithmState::ClusterState> clus2,
     Eigen::VectorXd weights2);
 
-// Evaluation of a finite dimensional BetaNegativeBinomial PMF
-Eigen::VectorXd evaluate_BNB(int rate, double shape_a, double shape_b, int K_max);
-
 }  // namespace bayesmix
 
 #endif  // BAYESMIX_UTILS_DISTRIBUTIONS_H_
