@@ -15,26 +15,9 @@ void TelescopingAlgorithm::print_startup_message() const{
     std::cout << msg << std::endl;
 }
 
-void TelescopingAlgorithm::remove_empty(const unsigned int idx) {
-    //Relabel allocations
-
-    for(auto &c : allocations){
-        if(c>idx){
-            std::cout << c << std::endl;
-            c -= 1;
-            std::cout << c << std::endl;
-        }
-    }
-    //remove cluster
-
-    unique_values.erase(unique_values.begin() + idx );
-    std::cout << "Size post erase in remove empty "<<unique_values.size() << std::endl;
-}
 
 void TelescopingAlgorithm::sample_allocations() {
     //step 1a of algorithm
-
-    std::cout << "siamo in sample_allocations" << std::endl;
 
     for(int i = 0; i < data.rows(); i++){
         Eigen::VectorXd log_probas = mixing -> get_mixing_weights(true,true);
@@ -49,8 +32,6 @@ void TelescopingAlgorithm::sample_allocations() {
             bayesmix::categorical_rng(stan::math::softmax(log_probas), rng, 0);
         unsigned int c_old = allocations[i];
 
-        //std::cout << "C_old: " << c_old << " -> C_new: " << c_new << std::endl;
-
         if (c_new != c_old) {
           allocations[i] = c_new;
           // Remove datum from old cluster, add to new
@@ -60,7 +41,6 @@ void TelescopingAlgorithm::sample_allocations() {
           unique_values[c_new]->add_datum(
               i, data.row(i), false);
         }
-       //std::cout << allocations.size() << std::endl;
     }
 
     auto KK = compute_KK(unique_values);
@@ -69,13 +49,10 @@ void TelescopingAlgorithm::sample_allocations() {
 
 }
 
-//Compute k_plus using get_card method of hierarchies (unique values); we then use function remove_empty inj order to remove empty clusters and perform relabeling
+//Compute k_plus using get_card method of hierarchies (unique values); we then use function remove_empty in order to remove empty clusters and perform relabeling
 unsigned int TelescopingAlgorithm::compute_KK(std::vector<std::shared_ptr<AbstractHierarchy>> &unique_values) {
-  //std::cout << "Siamo nel compute kk" << std::endl;
-  //std::cout << unique_values.size() << std::endl;
     int count = 0;
     for(auto it = unique_values.begin(); it != unique_values.end(); it++){
-        //std::cout <<unique_values[j] -> get_card() << std::endl;
 
         if((*it) -> get_card() > 0){
             count += 1;
@@ -87,18 +64,16 @@ unsigned int TelescopingAlgorithm::compute_KK(std::vector<std::shared_ptr<Abstra
                     c -= 1;
                 }
             }
-            std::cout << "SIamo pre erase" << std::endl;
+
             unique_values.erase(it);
-            it --;
+            it--;
         }
 
     }
-
     return count;
 }
 
 void TelescopingAlgorithm::sample_unique_values() {
-    std::cout << "siamo in unique_values" << std::endl;
     for (auto &un : unique_values) {
         un->sample_full_cond(!update_hierarchy_params());
     }
@@ -106,39 +81,22 @@ void TelescopingAlgorithm::sample_unique_values() {
 
 void TelescopingAlgorithm::add_new_clust() {
 
-  std::cout << "siamo in add_new_clust" << std::endl;
-
     int kk = mixing->get_K_plus();
     int K = mixing->get_num_components();
-    std::cout << "numero componenti prima dell'aggiunta " << unique_values.size() << std::endl;
-
-    for(int i = 0; i < unique_values.size(); i++) {
-        std::cout << unique_values[i] -> get_card() << std::endl;
-    }
 
     for(int j = kk; j < K; j++){
         std::shared_ptr<AbstractHierarchy> new_unique =
                 unique_values[0]->clone();
-        //Inizializzo dopo aver creato una gerarchia nuova dello stesso tipo
         new_unique->initialize();
         unique_values.push_back(new_unique);
     }
-
-    std::cout << "Now the components are: " << unique_values.size() << std::endl;
-
-
 }
 
 void TelescopingAlgorithm::step() {
-    std::cout << "siamo nello step" << std::endl;
-    for(int i = 0; i < unique_values.size(); i++) {
-        std::cout << unique_values[i] -> get_card() << std::endl;
-    }
+
     sample_allocations();
     sample_unique_values();
     mixing->update_state(unique_values, allocations);
-
     add_new_clust();
-    for(int i = 0; i < unique_values.size(); i++) {
-        std::cout << unique_values[i] -> get_card() << std::endl;
-    }}
+
+}

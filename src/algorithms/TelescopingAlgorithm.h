@@ -33,37 +33,31 @@ public:
     TelescopingAlgorithm() = default;
     ~TelescopingAlgorithm() = default;
 
-    // Implementing the same as in conditional algorithm
-    //virtual bool is_conditional() const override { return true; }
-
-    //virtual bool requires_conjugate_hierarchy() const { return false; }
-
    public:
     bayesmix::AlgorithmId get_id() const  override{
       return bayesmix::AlgorithmId::Telescoping;
     }
-      //! Prints a message at the beginning of `run()`
-      void print_startup_message() const override;
+    //! Prints a message at the beginning of `run()`
+    void print_startup_message() const override;
 
-      //! Performs Gibbs sampling sub-step for all allocation values
-      void sample_allocations() override;
+    //! Performs Gibbs sampling sub-step for all allocation values
+    void sample_allocations() override;
 
-      //! Performs Gibbs sampling sub-step for all unique values
-      void sample_unique_values() override;
+    //! Performs Gibbs sampling sub-step for all unique values
+    void sample_unique_values() override;
 
-      unsigned int compute_KK(std::vector<std::shared_ptr<AbstractHierarchy>> &);
+    //! Counts the filled components (hierarchies)
+    unsigned int compute_KK(std::vector<std::shared_ptr<AbstractHierarchy>> &);
 
-      void remove_empty(const unsigned int);
+    //!Adds empty hierarchies (if any) after simulating K >= K+
+    void add_new_clust();
 
-      void add_new_clust();
+    //!Runs the whole algorithm
+    void step() override;
 
-      void sample_weights() override {}
+    //!Necessary to force this class to be non abstract (otherwise it would inherit a virtual = 0 method)
+    void sample_weights() override {}
 
-      void step() override;
-
-    //temporary modification to see if we can compile it all: defining a new object mixing directly here of class MFM
-public:
-   //std::shared_ptr<MFMMixing> mixing;
 
 };
 
