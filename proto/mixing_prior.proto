@@ -70,13 +70,13 @@ message TruncSBPrior {
 
 
 message MFMPrior {
-    message BNBDistribution{
+    message BNBPrior{
         BeNeBiDistribution k_prior = 1;
     }
 
     oneof K {
         MFMState fixed_value = 1; // no prior -> uniforme
-        BNBDistribution bnb_prior = 2; //Prior on K
+        BNBPrior bnb_prior = 2; //Prior on K
     }
 }
 

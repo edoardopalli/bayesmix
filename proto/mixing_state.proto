@@ -37,6 +37,7 @@ message TruncSBState {
 message MFMState {
     int32 K = 1;
     double alpha = 2;
+    Vector weights = 3;
 }
 
 /*
