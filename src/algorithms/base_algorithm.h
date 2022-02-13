@@ -59,8 +59,6 @@ class BaseAlgorithm {
     }
     // Main loop
     while (iter < maxiter) {
-      std::cout << "####################" << std::endl;
-      std::cout << "Iteration: " << iter + 1 << std::endl;
       step();
       if (iter >= burnin) {
         save_state(collector, iter);
